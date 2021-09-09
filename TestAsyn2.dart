@@ -18,16 +18,17 @@ Future<int> threadRun2(int val) async {
 
 Future<void> main(List<String> args) async {
   print("Begin");
+  List<int> rs = List.filled(2, 0);
   DateTime start = DateTime.now();
-
-  // threadRun1(1);
-  // threadRun2(2);
+  rs = await Future.wait([threadRun1(1), threadRun2(2)]);
+  DateTime start2 = DateTime.now();
   Future<int> tr1 = Future.sync(() => threadRun1(1));
   Future<int> tr2 = Future.sync(() => threadRun2(2));
-  int rs1 = await tr1;
-  int rs2 = await tr2;
+  rs[0] = await tr1;
+  rs[1] = await tr2;
   DateTime finish = DateTime.now();
   print("End");
-  print("result: ${rs1} ${rs2}");
-  print("Time run: ${finish.difference(start).inMilliseconds}");
+  print("result: ${rs[0]} ${rs[1]}");
+  print("Time run1: ${start2.difference(start).inMilliseconds}\n"
+      "Time run2: ${finish.difference(start2).inMilliseconds}");
 }

@@ -102,8 +102,17 @@ Future<void> createHttpServer() async {
   // Shelf.Cascade cascade = Shelf.Cascade().add(hackyRouterHandler);
   // .add(websocketHandler);
 
-  s.Handler handler = s.logRequests().addHandler(cascade.handler);
+  // s.Handler handler = s.logRequests().addHandler(cascade.handler);
   // Shelf.Handler handler = pipeline;
+  s.Middleware middleware = s.createMiddleware(requestHandler: (request) {
+    if (request.url.path.endsWith('/error')) {
+      return s.Response.forbidden("Error name is invalid");
+    } else {
+      print("${request.url.path}");
+    }
+  });
+  s.Handler handler =
+      s.logRequests().addHandler(middleware.addHandler(cascade.handler));
 
   sIo
       .serve(

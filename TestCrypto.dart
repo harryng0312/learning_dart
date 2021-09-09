@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 
 Future<void> testMessageDigest() async {
+  print("===== SHA256 =====");
   String data = "cộng hòa xã hội chủ nghĩa việt nam";
   Sha256 sha256 = Sha256();
   List<int> input = utf8.encode(data);
@@ -13,15 +14,20 @@ Future<void> testMessageDigest() async {
 }
 
 Future<void> testCrypto() async {
+  print("===== AES GCM =====");
   List<int> data = utf8.encode("cộng hòa xẫ hội chủ nghĩa việt nam");
   Random rand = Random.secure();
-  List<int> keyBytes = List<int>.generate(16, (index) => rand.nextInt(256));
-  List<int> addBytes = List<int>.generate(16, (index) => rand.nextInt(256));
+  int byteLen = 16;
+  List<int> keyBytes =
+      List<int>.generate(byteLen, (index) => rand.nextInt(256));
+  List<int> addBytes =
+      List<int>.generate(byteLen, (index) => rand.nextInt(256));
+  List<int> iv = List<int>.generate(byteLen, (index) => rand.nextInt(256));
 
   AesGcm cipher = AesGcm.with128bits();
   // cipher.newSecretKeyFromBytes(keyBytes);
-  SecretKey randKey = await cipher.newSecretKey();
-  List<int> nonce = await cipher.newNonce();
+  SecretKey randKey = await cipher.newSecretKeyFromBytes(keyBytes);
+  List<int> nonce = iv;
   List<int> add = addBytes;
   // List<int> randKeyBytes = await randKey.extractBytes();
 
@@ -31,7 +37,7 @@ Future<void> testCrypto() async {
   List<int> c = resultBox.cipherText;
   String cipherText = base64Encode(c);
   String mac = base64Encode(resultBox.mac.bytes);
-  print("Cipher text: ${cipherText}\nCipher mac: ${mac}");
+  print("Cipher text: ${cipherText}\nCipher mac: ${mac} len ${mac.length}");
 
   // decrypt
   List<int> macBytes = base64Decode(mac);

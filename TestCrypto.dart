@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 
 Future<void> testMessageDigest() async {
-  print("===== SHA256 =====");
+  print("===== SHA 256 =====");
   String data = "cộng hòa xã hội chủ nghĩa việt nam";
   Sha256 sha256 = Sha256();
   List<int> input = utf8.encode(data);
@@ -14,7 +14,7 @@ Future<void> testMessageDigest() async {
 }
 
 Future<void> testCrypto() async {
-  print("===== AES GCM =====");
+  print("===== AES GCM 128 =====");
   List<int> data = utf8.encode("cộng hòa xẫ hội chủ nghĩa việt nam");
   Random rand = Random.secure();
   int byteLen = 16;
@@ -52,9 +52,21 @@ Future<void> testCrypto() async {
   // print("Rand most bit:${randKeyBytes[0] >> 7} ${randKeyBytes[15] >> 7}");
 }
 
-Future<void> testSignature() async {}
+Future<void> testSignature() async {
+  print("===== ECDSA 256 =====");
+  List<int> data = utf8.encode("cộng hòa xẫ hội chủ nghĩa việt nam");
+  Random rand = Random.secure();
+  int byteLen = 16;
+
+  HashAlgorithm hashAlgorithm = Sha256();
+  Ecdsa algorithm = Ecdsa.p256(hashAlgorithm);
+
+  EcKeyPair keyPair = await algorithm.newKeyPair();
+  EcKeyPairData keyPairData = await keyPair.extract();
+  print("key pair: ${keyPairData.toString()}");
+}
 
 Future<void> testKeyAgreement() async {}
 void main(List<String> args) {
-  Future.wait([testMessageDigest(), testCrypto()]);
+  Future.wait([testMessageDigest(), testCrypto(), testSignature()]);
 }

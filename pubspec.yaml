@@ -34,6 +34,7 @@ dependencies:
   dio: ^4.0.0
   cryptography: ^2.0.2
   firebase: ^9.0.1
+  pointycastle: ^3.3.4
   
 
 dev_dependencies:

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -23,7 +22,10 @@ Future<void> testMessageDigest() async {
 Future<void> testCrypto() async {
   print("===== AES GCM 128 =====");
   Uint8List data =
-      Uint8List.fromList(utf8.encode("cộng hòa xã hội chủ nghĩa việt nam"));
+      Uint8List.fromList(utf8.encode("cộng hòa xã hội chủ nghĩa việt nam   "
+          "cộng hòa xã hội chủ nghĩa việt nam   "
+          "cộng hòa xã hội chủ nghĩa việt nam   "
+          "cộng hòa xã hội chủ nghĩa việt nam "));
   print("AES Data len:${data.length}");
   Random rand = Random.secure();
   int byteLen = 16;
@@ -41,48 +43,44 @@ Future<void> testCrypto() async {
   CipherParameters ivParams = ParametersWithIV(keyParams, iv);
 
   // encrypt
-  cipher.init(true, ivParams);
-  Uint8List cipherData = Uint8List(data.length + 16);
-  // add AAD
-  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
-  int outOff = 0;
-  while (outOff < data.length) {
-    outOff += cipher.processBlock(data, outOff, cipherData, outOff);
-  }
-  int aadLen = cipher.doFinal(cipherData, outOff);
-
-  String cipherText = base64Encode(cipherData);
-  String macText = base64Encode(cipherData.sublist(cipherData.length - aadLen));
-  print("Cipher text: ${cipherText} cipher len: ${cipherData.length}"
-      "\nCipher mac: ${macText} aad len ${aadLen}");
   cipher.reset();
+  cipher.init(true, ivParams);
+  Uint8List cipherDataBuff = Uint8List(cipher.getOutputSize(data.length));
+  // add AAD
+  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
+  int inOff = 0;
+  while (inOff < data.length) {
+    inOff += cipher.processBlock(data, inOff, cipherDataBuff, inOff);
+  }
+  inOff += cipher.doFinal(cipherDataBuff, inOff);
+  Uint8List cipherData = Uint8List.view(cipherDataBuff.buffer, 0, inOff);
+  // cipherData = cipher.process(data);
+  String cipherText = base64Encode(cipherData);
+  print("Cipher text: ${cipherText} cipher len: ${cipherData.length}");
+
   // decrypt
   // cipher = GCMBlockCipher(AESFastEngine());
+  cipher.reset();
   cipher.init(false, ivParams);
-  Uint8List cipherContentData = cipherData.sublist(0, cipherData.length - 16);
-  Uint8List macData = cipherData.sublist(cipherData.length - 16);
-  Uint8List plainData = Uint8List(cipherContentData.length);
-  // cipherData[cipherData.length - 1] += 1;
-  // add AAD
-  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
-  // outOff = 0;
-  // while (outOff < plainData.length) {
-  // outOff += cipher.processBlock(cipherData, outOff, plainData, outOff);
-  // outOff += cipher.processBytes(cipherData, outOff, 16, plainData, outOff);
-  // }
-  plainData = cipher.process(cipherData);
-  print("outoff:${outOff}");
-  // aadLen = cipher.doFinal(cipherData, outOff);
-  // try {
-  // aadLen = cipher.doFinal(cipherData, plainData.length);
-  cipher.validateMac();
+  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
+  Uint8List plainDataBuff = Uint8List(cipher.getOutputSize(cipherData.length));
+  Uint8List cipherContetnBuff =
+      Uint8List.view(cipherData.buffer, 0, cipherData.length - cipher.macSize);
+  int outOff = 0;
+  while (outOff < cipherContetnBuff.length) {
+    outOff += cipher.processBlock(cipherData, outOff, plainDataBuff, outOff);
+  }
+  try {
+    outOff += cipher.doFinal(plainDataBuff, outOff);
+    print("doFinal outOff:${outOff}");
+  } on InvalidCipherTextException catch (e) {
+    print("ex:${e.message}");
+  }
+  print("do-outOff:${outOff}");
+  Uint8List plainData = Uint8List.view(plainDataBuff.buffer, 0, outOff);
+  // Uint8List plainData = cipher.process(cipherData);
   String plainText = utf8.decode(plainData);
-  macText = base64Encode(macData);
-  print("Plain text: ${plainText} plain len: ${plainData.length}"
-      "\nCipher mac: ${macText} len ${aadLen}");
-  // } on InvalidCipherTextException catch (e) {
-  // print("ex:${e.message}");
-  // }
+  print("Plain text: ${plainText} plain len: ${plainData.length}");
 }
 
 Future<void> testSignature() async {
@@ -101,5 +99,9 @@ Future<void> testSignature() async {
 
 Future<void> testKeyAgreement() async {}
 void main(List<String> args) {
-  Future.wait([testMessageDigest(), testCrypto(), testSignature()]);
+  Future.wait([
+    // testMessageDigest(),
+    testCrypto(),
+    // testSignature()
+  ]);
 }

@@ -47,7 +47,7 @@ Future<void> testCrypto() async {
   cipher.init(true, ivParams);
   Uint8List cipherDataBuff = Uint8List(cipher.getOutputSize(data.length));
   // add AAD
-  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
+  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
   int inOff = 0;
   while (inOff < data.length) {
     inOff += cipher.processBlock(data, inOff, cipherDataBuff, inOff);
@@ -62,46 +62,69 @@ Future<void> testCrypto() async {
   // cipher = GCMBlockCipher(AESFastEngine());
   cipher.reset();
   cipher.init(false, ivParams);
-  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
+  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
   Uint8List plainDataBuff = Uint8List(cipher.getOutputSize(cipherData.length));
   Uint8List cipherContetnBuff =
       Uint8List.view(cipherData.buffer, 0, cipherData.length - cipher.macSize);
   int outOff = 0;
-  while (outOff < cipherContetnBuff.length) {
-    outOff += cipher.processBlock(cipherData, outOff, plainDataBuff, outOff);
-  }
-  try {
-    outOff += cipher.doFinal(plainDataBuff, outOff);
-    print("doFinal outOff:${outOff}");
-  } on InvalidCipherTextException catch (e) {
-    print("ex:${e.message}");
-  }
-  print("do-outOff:${outOff}");
-  Uint8List plainData = Uint8List.view(plainDataBuff.buffer, 0, outOff);
-  // Uint8List plainData = cipher.process(cipherData);
+  // while (outOff < cipherContetnBuff.length) {
+  // bug here
+  // outOff += cipher.processBlock(cipherData, outOff, plainDataBuff, outOff);
+  // }
+  // try {
+  // outOff += cipher.doFinal(plainDataBuff, outOff);
+  // print("doFinal outOff:${outOff}");
+  // } on InvalidCipherTextException catch (e) {
+  // print("ex:${e.message}");
+  // }
+  // print("do-outOff:${outOff}");
+  // Uint8List plainData = Uint8List.view(plainDataBuff.buffer, 0, outOff);
+  Uint8List plainData = cipher.process(cipherData);
   String plainText = utf8.decode(plainData);
   print("Plain text: ${plainText} plain len: ${plainData.length}");
 }
 
 Future<void> testSignature() async {
   // print("===== ECDSA 256 =====");
-  // List<int> data = utf8.encode("cộng hòa xẫ hội chủ nghĩa việt nam");
-  // Random rand = Random.secure();
-  // int byteLen = 16;
+  final data =
+      Uint8List.fromList(utf8.encode("cộng hòa xẫ hội chủ nghĩa việt nam"));
+  var random = Random.secure();
+  var seed =
+      Uint8List.fromList(List<int>.generate(32, (_) => random.nextInt(256)));
+  FortunaRandom rand = FortunaRandom();
+  rand.seed(KeyParameter(seed));
 
-  // HashAlgorithm hashAlgorithm = Sha256();
-  // Ecdsa algorithm = Ecdsa.p256(hashAlgorithm);
+  ECKeyGeneratorParameters keyParams =
+      ECKeyGeneratorParameters(ECCurve_secp256k1());
 
-  // EcKeyPair keyPair = await algorithm.newKeyPair();
-  // EcKeyPairData keyPairData = await keyPair.extract();
-  // print("key pair: ${keyPairData.toString()}");
+  ECKeyGenerator keyGenerator = ECKeyGenerator();
+  keyGenerator.init(ParametersWithRandom(keyParams, rand));
+
+  AsymmetricKeyPair<PublicKey, PrivateKey> keyPair =
+      keyGenerator.generateKeyPair();
+
+  ECDSASigner signer = ECDSASigner(SHA256Digest());
+
+  // sign
+  CipherParameters privateKeyParam = PrivateKeyParameter(keyPair.privateKey);
+  signer.reset();
+  ParametersWithRandom parametersWithRandom =
+      ParametersWithRandom(privateKeyParam, rand);
+  signer.init(true, parametersWithRandom);
+  ECSignature signature = signer.generateSignature(data) as ECSignature;
+  // verify
+  PublicKeyParameter publicKeyParam = PublicKeyParameter(keyPair.publicKey);
+  signer.reset();
+  signer.init(false, publicKeyParam);
+  bool verified = signer.verifySignature(data, signature);
+  print("verified:${verified}");
 }
 
 Future<void> testKeyAgreement() async {}
 void main(List<String> args) {
   Future.wait([
     // testMessageDigest(),
-    testCrypto(),
-    // testSignature()
+    // testCrypto(),
+    testSignature()
   ]);
 }

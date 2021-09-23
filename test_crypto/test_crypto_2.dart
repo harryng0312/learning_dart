@@ -45,16 +45,9 @@ Future<void> testCrypto() async {
   // encrypt
   cipher.reset();
   cipher.init(true, ivParams);
-  Uint8List cipherDataBuff = Uint8List(cipher.getOutputSize(data.length));
   // add AAD
-  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
-  int inOff = 0;
-  while (inOff < data.length) {
-    inOff += cipher.processBlock(data, inOff, cipherDataBuff, inOff);
-  }
-  inOff += cipher.doFinal(cipherDataBuff, inOff);
-  Uint8List cipherData = Uint8List.view(cipherDataBuff.buffer, 0, inOff);
-  // cipherData = cipher.process(data);
+  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
+  Uint8List cipherData = cipher.process(data);
   String cipherText = base64Encode(cipherData);
   print("Cipher text: ${cipherText} cipher len: ${cipherData.length}");
 
@@ -62,23 +55,7 @@ Future<void> testCrypto() async {
   // cipher = GCMBlockCipher(AESFastEngine());
   cipher.reset();
   cipher.init(false, ivParams);
-  // cipher.processAADBytes(aadBytes, 0, aadBytes.length);
-  Uint8List plainDataBuff = Uint8List(cipher.getOutputSize(cipherData.length));
-  Uint8List cipherContetnBuff =
-      Uint8List.view(cipherData.buffer, 0, cipherData.length - cipher.macSize);
-  int outOff = 0;
-  // while (outOff < cipherContetnBuff.length) {
-  // bug here
-  // outOff += cipher.processBlock(cipherData, outOff, plainDataBuff, outOff);
-  // }
-  // try {
-  // outOff += cipher.doFinal(plainDataBuff, outOff);
-  // print("doFinal outOff:${outOff}");
-  // } on InvalidCipherTextException catch (e) {
-  // print("ex:${e.message}");
-  // }
-  // print("do-outOff:${outOff}");
-  // Uint8List plainData = Uint8List.view(plainDataBuff.buffer, 0, outOff);
+  cipher.processAADBytes(aadBytes, 0, aadBytes.length);
   Uint8List plainData = cipher.process(cipherData);
   String plainText = utf8.decode(plainData);
   print("Plain text: ${plainText} plain len: ${plainData.length}");

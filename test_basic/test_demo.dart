@@ -1,5 +1,5 @@
 import 'dart:core';
-import 'oop/test_class.dart';
+import 'package:learning_dart/test_basic/oop/test_class.dart';
 
 void testPrint() {
   TestClass test = new TestClass();

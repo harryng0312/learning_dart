@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.harryng.dark.demo";
+option java_outer_classname = "HelloworldProto";
+option objc_class_prefix = "RTG";
+
+package org.harryng.dart;
+
+
+service HelloworldService {
+    rpc GetCurrentDate(GetCurrentDateRequest) returns (GetCurrentDateResponse) {}
+}
+
+message GetCurrentDateRequest {
+    string name = 1;
+}
+
+message GetCurrentDateResponse {
+    string name = 1;
+    string result = 2;
+}

@@ -35,6 +35,8 @@ dependencies:
   cryptography: ^2.0.2
   firebase: ^9.0.1
   pointycastle: ^3.3.4
+  protobuf: ^2.0.0
+  grpc: ^3.0.2
   
 
 dev_dependencies:

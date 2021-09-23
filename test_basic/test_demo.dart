@@ -1,5 +1,5 @@
 import 'dart:core';
-import "org/harryng/demo/TestClass.dart";
+import 'oop/test_class.dart';
 
 void testPrint() {
   TestClass test = new TestClass();

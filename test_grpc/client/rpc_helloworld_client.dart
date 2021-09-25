@@ -66,11 +66,13 @@ Future<void> sendMessageStream() async {
 
   Stream<ChatMessage> request = createStream(msg);
   try {
-    ChatSignal rs = await stub.sendChatStream(
+    Stream<ChatSignal> resultStream = await stub.sendChatStream(
       request,
       options: CallOptions(compression: const GzipCodec()),
     );
-    print("result: ${rs.state}");
+    await for (var signal in resultStream) {
+      print("Signal:${signal.state}");
+    }
   } catch (e) {
     print('Caught error: $e');
   }

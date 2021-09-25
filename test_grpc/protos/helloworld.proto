@@ -12,7 +12,7 @@ service HelloworldService {
     rpc GetCurrentDate(GetCurrentDateRequest) returns (GetCurrentDateResponse) {}
     rpc LoginChat(AuthRequest) returns (AuthResponse){}
     rpc LogoutChat(AuthRequest) returns (AuthResponse){}
-    rpc SendChatStream(stream ChatMessage) returns (ChatSignal) {}
+    rpc SendChatStream(stream ChatMessage) returns (stream ChatSignal) {}
 }
 
 message GetCurrentDateRequest {

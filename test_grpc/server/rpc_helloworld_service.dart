@@ -54,19 +54,24 @@ class RpcHelloworldService extends HelloworldServiceBase {
   }
 
   @override
-  Future<ChatSignal> sendChatStream(
-      ServiceCall call, Stream<ChatMessage> request) async {
+  Stream<ChatSignal> sendChatStream(
+      ServiceCall call, Stream<ChatMessage> request) async* {
     // ignore: unnecessary_null_comparison
+    // late var rsStream;
+
     if (request != null) {
-      await request.forEach((msg) {
-        logger.info("Client msg:${utf8.decode(msg.message)}");
-      });
+      // var chatSignals = <ChatSignal>[];
+      // await request.forEach((msg) {});
+      await for (var msg in request) {
+        logger.info("Client send ${msg.state} msg:${utf8.decode(msg.message)}");
+        msg.state = MessageState.SENDING;
+        ChatSignal chatSignal = ChatSignal.create();
+        chatSignal.state = msg.state;
+        yield chatSignal;
+      }
     } else {
       logger.severe("request is null");
     }
-    var signal = ChatSignal.create();
-    signal.state = MessageState.SENDING;
-    return signal;
   }
 }
 

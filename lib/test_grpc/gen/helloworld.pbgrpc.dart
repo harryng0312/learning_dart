@@ -57,11 +57,10 @@ class HelloworldServiceClient extends $grpc.Client {
     return $createUnaryCall(_$logoutChat, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.ChatSignal> sendChatStream(
+  $grpc.ResponseStream<$0.ChatSignal> sendChatStream(
       $async.Stream<$0.ChatMessage> request,
       {$grpc.CallOptions? options}) {
-    return $createStreamingCall(_$sendChatStream, request, options: options)
-        .single;
+    return $createStreamingCall(_$sendChatStream, request, options: options);
   }
 }
 
@@ -96,7 +95,7 @@ abstract class HelloworldServiceBase extends $grpc.Service {
         'SendChatStream',
         sendChatStream,
         true,
-        false,
+        true,
         ($core.List<$core.int> value) => $0.ChatMessage.fromBuffer(value),
         ($0.ChatSignal value) => value.writeToBuffer()));
   }
@@ -123,6 +122,6 @@ abstract class HelloworldServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.AuthRequest request);
   $async.Future<$0.AuthResponse> logoutChat(
       $grpc.ServiceCall call, $0.AuthRequest request);
-  $async.Future<$0.ChatSignal> sendChatStream(
+  $async.Stream<$0.ChatSignal> sendChatStream(
       $grpc.ServiceCall call, $async.Stream<$0.ChatMessage> request);
 }

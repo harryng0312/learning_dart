@@ -86,6 +86,7 @@ Future<void> startServer() async {
 }
 
 void main(List<String> args) {
+  // gen: protoc -Itest_grpc/protos/ --dart_out=grpc:lib/test_grpc/gen/ test_grpc/protos/*.proto
   // http://{{ grpc server address}}/{{proto package}}.{{proto service}}/{{method}}
   initLogger();
   startServer();

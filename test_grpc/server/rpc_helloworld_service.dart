@@ -1,9 +1,26 @@
+import 'dart:convert';
+
 import 'package:grpc/grpc.dart';
 import 'package:intl/intl.dart';
 import 'package:learning_dart/test_grpc/gen/helloworld.pbgrpc.dart';
 import 'package:logging/logging.dart';
 
 late Logger logger;
+
+void initLogger() {
+  Logger.root.level = Level.INFO;
+  logger = Logger("TestHelloworldService");
+  // File file = File("log/http_server.log");
+  // if (!file.existsSync()) {
+  //   file.createSync(recursive: true);
+  // }
+  logger.onRecord.listen((record) {
+    // file.writeAsString(
+    //     "${record.level.name}: ${record.time}: ${record.message}\n",
+    //     mode: FileMode.append);
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+}
 
 class RpcHelloworldService extends HelloworldServiceBase {
   static DateFormat _dateFormat = DateFormat("yyyy/MM/dd HH:mm:ss");
@@ -41,7 +58,9 @@ class RpcHelloworldService extends HelloworldServiceBase {
       ServiceCall call, Stream<ChatMessage> request) async {
     // ignore: unnecessary_null_comparison
     if (request != null) {
-      request.forEach((msg) {});
+      await request.forEach((msg) {
+        logger.info("Client msg:${utf8.decode(msg.message)}");
+      });
     } else {
       logger.severe("request is null");
     }
@@ -51,24 +70,7 @@ class RpcHelloworldService extends HelloworldServiceBase {
   }
 }
 
-void initLogger() {
-  Logger.root.level = Level.INFO;
-  logger = Logger("TestHelloworldService");
-  // File file = File("log/http_server.log");
-  // if (!file.existsSync()) {
-  //   file.createSync(recursive: true);
-  // }
-  logger.onRecord.listen((record) {
-    // file.writeAsString(
-    //     "${record.level.name}: ${record.time}: ${record.message}\n",
-    //     mode: FileMode.append);
-    print('${record.level.name}: ${record.time}: ${record.message}');
-  });
-}
-
-Future<void> main(List<String> args) async {
-  // http://{{ grpc server address}}/{{proto package}}.{{proto service}}/{{method}}
-  initLogger();
+Future<void> startServer() async {
   final server = Server(
     [RpcHelloworldService()],
     const <Interceptor>[],
@@ -76,4 +78,10 @@ Future<void> main(List<String> args) async {
   );
   await server.serve(port: 50051);
   print('Server listening on port ${server.port}...');
+}
+
+void main(List<String> args) {
+  // http://{{ grpc server address}}/{{proto package}}.{{proto service}}/{{method}}
+  initLogger();
+  startServer();
 }

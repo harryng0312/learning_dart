@@ -1,5 +1,5 @@
 bin/
-log/
+**/log/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -7,3 +7,6 @@ log/
 pubspec.lock
 firebase/harry-s-firebase-test-firebase-adminsdk-nb76s-82ef0f4b73.json
 **/.DS_Store
+
+**/run/
+**/cache/

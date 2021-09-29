@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  proxy:
+    image: nginx:latest
+    hostname: proxy
+    container_name: proxy
+    domainname: proxy
+    read_only: true
+    restart: always
+    environment:
+      - TZ=${timezone}
+    ports:
+      - "9443:50443"
+    volumes:
+      - ${tmp_dir}:/tmp
+      - ${proxy_cache}:/var/cache/nginx
+      - ${proxy_conf}:/etc/nginx/nginx.conf
+      - ${proxy_log}:/var/log/nginx
+      - ${proxy_cert}:/etc/nginx/cert
+    tmpfs:
+      - /var/run
+    networks:
+      external-net:
+        aliases:
+          - app
+          
+networks:
+  external-net:
+    name: external-net

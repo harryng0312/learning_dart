@@ -1,21 +1,25 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:grpc/grpc.dart';
 import 'package:learning_dart/test_grpc/gen/helloworld.pbgrpc.dart';
 
 late ClientChannel channel;
 late HelloworldServiceClient stub;
-final host = "localhost";
+final host = "harryng.local";
 final port = 9443;
 
 void init() {
+  DateTime now = DateTime.now();
   channel = ClientChannel(
     host,
     port: port,
     options: ChannelOptions(
       credentials: ChannelCredentials.secure(
+        authority: host,
         onBadCertificate: (certificate, host) {
-          return true;
+          return certificate.startValidity.isBefore(now) &&
+              now.isBefore(certificate.endValidity);
         },
       ),
       codecRegistry:

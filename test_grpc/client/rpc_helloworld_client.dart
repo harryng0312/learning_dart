@@ -6,14 +6,18 @@ import 'package:learning_dart/test_grpc/gen/helloworld.pbgrpc.dart';
 late ClientChannel channel;
 late HelloworldServiceClient stub;
 final host = "localhost";
-final port = 50051;
+final port = 9443;
 
 void init() {
   channel = ClientChannel(
     host,
     port: port,
     options: ChannelOptions(
-      credentials: ChannelCredentials.insecure(),
+      credentials: ChannelCredentials.secure(
+        onBadCertificate: (certificate, host) {
+          return true;
+        },
+      ),
       codecRegistry:
           CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),
     ),

@@ -3,8 +3,8 @@ openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout root-key.ke
 2. create the request:
 openssl req -out web-cert.csr -new -newkey rsa:2048 -nodes -keyout web-key.key
 
-openssl genrsa -out web-key.key 2048
-openssl req -new -sha256 -out web-cert.csr -key web-key.key -config ssl.conf
+openssl genrsa -out nginx/cert/client-key.key 2048
+openssl req -new -sha256 -out nginx/cert/client-cert.csr -key nginx/cert/client-key.key -config nginx/cert/ssl.conf
 openssl req -text -noout -in web-cert.csr
 
 3. trust:
@@ -15,4 +15,10 @@ openssl x509 -req -in nginx/cert/web-cert.csr -CA nginx/cert/root-cert.crt \
 -CAkey nginx/cert/root-key.key -CAcreateserial \
 -out nginx/cert/web-cert.crt -days 730 -sha256 \
 -extensions req_ext -extfile nginx/cert/ssl.conf
+
+openssl x509 -req -in nginx/cert/client-cert.csr -CA nginx/cert/root-cert.crt \
+-CAkey nginx/cert/root-key.key -CAcreateserial \
+-out nginx/cert/client-cert.crt -days 730 -sha256 \
+-extensions req_ext -extfile nginx/cert/ssl.conf
+
 openssl x509 -req -in web-cert.csr -CA root-cert.crt -CAkey root-key.key -CAcreateserial -out web-cert.crt -days 365 -sha256

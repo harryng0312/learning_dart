@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:grpc/grpc.dart';
 import 'package:learning_dart/test_grpc/gen/helloworld.pbgrpc.dart';
 
@@ -15,10 +17,12 @@ void init() {
     options: ChannelOptions(
       credentials: ChannelCredentials.secure(
         authority: host,
-        onBadCertificate: (certificate, host) {
-          return certificate.startValidity.isBefore(now) &&
-              now.isBefore(certificate.endValidity);
-        },
+        certificates: Uint8List.fromList(
+            File("./nginx/cert/client-cert.crt").readAsBytesSync()),
+        // onBadCertificate: (certificate, host) {
+        //   return certificate.startValidity.isBefore(now) &&
+        //       now.isBefore(certificate.endValidity);
+        // },
       ),
       codecRegistry:
           CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),

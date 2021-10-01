@@ -6,19 +6,20 @@ import 'package:learning_dart/test_grpc/gen/helloworld.pbgrpc.dart';
 
 late ClientChannel channel;
 late HelloworldServiceClient stub;
-final host = "harryng.local";
+final host = "rhel-php";
 final port = 9443;
 
 void init() {
-  DateTime now = DateTime.now();
+  final certsBytes = Uint8ClampedList.fromList(
+      File("./nginx/cert/root-cert.crt").readAsBytesSync());
+  // DateTime now = DateTime.now();
   channel = ClientChannel(
     host,
     port: port,
     options: ChannelOptions(
       credentials: ChannelCredentials.secure(
         authority: host,
-        certificates: Uint8List.fromList(
-            File("./nginx/cert/client-cert.crt").readAsBytesSync()),
+        certificates: certsBytes,
         // onBadCertificate: (certificate, host) {
         //   return certificate.startValidity.isBefore(now) &&
         //       now.isBefore(certificate.endValidity);

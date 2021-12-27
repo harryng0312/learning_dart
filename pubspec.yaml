@@ -32,7 +32,7 @@ dependencies:
   socket_io_client: ^1.0.1
   logging: ^1.0.1
   dio: ^4.0.0
-  cryptography: ^2.0.2
+  cryptography: ^2.0.5
   firebase: ^9.0.1
   pointycastle: ^3.3.4
   protobuf: ^2.0.0
